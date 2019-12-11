@@ -1,12 +1,16 @@
-#include <stdio.h>
+#include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
+#include "time.h"
 
-#define maxH 5
-#define maxW 5
+int getRandom(int lower, int upper) {
+    return (rand() % (upper - lower + 1)) + lower;
+}
 
 int borderFixer(int val, int max) {
     if (val < 0) {
         return max - 1;
-    } else if (val > max) {
+    } else if (val > max - 1) {
         return 0;
     } else {
         return val;
@@ -15,56 +19,63 @@ int borderFixer(int val, int max) {
 }
 
 void matrixYaz(int h, int w, int matrix[h][w]) {
+    char word2[1000] = "";
+    printf("        |");
+    strcat(word2,"---------");
+    for (int k = 0; k < w; ++k) {
+        printf("(%6d)|", k + 1);
+        strcat(word2,"------");
+    }
+    printf("\n%s\n",word2);
     for (int i = 0; i < h; ++i) {
-        for (int j = 0; j < w; ++j) {
-            printf("%-+5d", matrix[i][j]);
+        char word[1000] = "";
+        for (int j = -1; j < w; ++j) {
+            if (j == -1){
+                printf("(%-6d)|", i + 1);
+            } else {
+                printf("%-+8d|", matrix[i][j]);
+            }
+            strcat(word,"---------");
         }
-        printf("\n");
+        printf("\n%s\n",word);
     }
 }
 
 int main() {
-    int imageMatrix[maxH][maxW] = {
-            {105, 102, 100, 97,  96},
-            {103, 99,  103, 101, 102},
-            {101, 98,  104, 102, 100},
-            {99,  101, 106, 104, 99},
-            {104, 104, 104, 100, 98}
-    };
+    srand(time(0));
+    int maxH, maxW;
+    int status;
+    printf("Enter Image Matrix sizes (Min: 3x3 Format: AxB):");
+    status = scanf(" %dx%d", &maxH, &maxW);
+    if (status != 2 || maxH < 3 || maxW < 3){
+        printf("-Incorrect format.");
+        exit(0);
+    }
+    printf("-Image Matrix define as %dx%d\n",maxH,maxW);
+    int imageMatrix[maxH][maxW];
+    for (int i = 0; i < maxH; ++i) {
+        for (int j = 0; j < maxW; ++j) {
+            imageMatrix[i][j] = getRandom(0, 255);
+        }
+    }
     int kernelMatrix[3][3] = {
             {0,  -1, 0},
-            {-1, 5,  -1},
+            {-1, 5, -1},
             {0,  -1, 0}
     };
-    int resultMatrix[5][5];
+    for (int k = 0; k < 3; ++k) {
+        for (int i = 0; i < 3; ++i) {
+            printf("Enter Kernel Matrix Values (Format: Number) (%dx%d Of 3x3):", k + 1, i + 1);
+            status = scanf(" %d", &kernelMatrix[k][i]);
+            if (status != 1){
+                printf("-Incorrect format.");
+                exit(0);
+            }
+        }
+    }
+    int resultMatrix[maxH][maxW];
     int h = 0;
     int w = 0;
-    //First part
-    /*
-    while (h < 5-2){
-        while (w < 5-2) {
-            resultMatrix[h][w] =
-                    imageMatrix[h][w] * kernelMatrix[0][0] +
-                    imageMatrix[h][w + 1] * kernelMatrix[0][1] +
-                    imageMatrix[h][w + 2] * kernelMatrix[0][2] +
-
-                    imageMatrix[h + 1][w] * kernelMatrix[1][0] +
-                    imageMatrix[h + 1][w + 1] * kernelMatrix[1][1] +
-                    imageMatrix[h + 1][w + 2] * kernelMatrix[1][2] +
-
-                    imageMatrix[h + 2][w] * kernelMatrix[2][0] +
-                    imageMatrix[h + 2][w + 1] * kernelMatrix[2][1] +
-                    imageMatrix[h + 2][w + 2] * kernelMatrix[2][2];
-            printf("%-5d",resultMatrix[h][w]);
-            w++;
-        }
-        printf("\n");
-        w = 0;
-        h++;
-    }
-    //printf("%d",resultMatrix[0][0]);
-*/
-    //Scond part
     while (h < maxH) {
         while (w < maxW) {
             resultMatrix[h][w] =
@@ -81,39 +92,43 @@ int main() {
                     imageMatrix[borderFixer(h + 1, maxH)][borderFixer(w + 1, maxW)] * kernelMatrix[2][2];
             w++;
         }
-        printf("\n");
         w = 0;
         h++;
     }
     int okunanA, okunanB;
-    printf("Enter the matrix adresses (Format: Number Number):");
-    scanf(" %d %d", &okunanA, &okunanB);
+    printf("Enter the matrix address (Format: AxB):");
+    status = scanf(" %dx%d", &okunanA, &okunanB);
+    if (status != 2 || okunanA > maxH || okunanB > maxW || okunanA < 1 || okunanB < 1){
+        printf("-Incorrect format.");
+        exit(0);
+    }
     h = okunanA;
     w = okunanB;
-    printf("Result: %d\n", resultMatrix[okunanA][okunanB]);
-    printf("\n-----------------------------------------------\n");
-    printf("Matrix which the result is generated:\n");
-    printf("%-5d", imageMatrix[borderFixer(h - 1, maxH)][borderFixer(w - 1, maxW)]);
-    printf("%-5d", imageMatrix[borderFixer(h - 1, maxH)][w]);
-    printf("%-5d", imageMatrix[borderFixer(h - 1, maxH)][borderFixer(w + 1, maxW)]);
+    printf("*********************************************\n");
+    printf("Result: %d\n", resultMatrix[okunanA - 1][okunanB - 1]);
+    printf("*********************************************\n");
+    printf("Matrix which the result is generated:\n"
+           "-------------------------------------\n");
+    printf("%-5d", imageMatrix[borderFixer(okunanA - 1 - 1, maxH)][borderFixer(okunanB - 1 - 1, maxW)]);
+    printf("%-5d", imageMatrix[borderFixer(okunanA - 1 - 1, maxH)][okunanB - 1]);
+    printf("%-5d", imageMatrix[borderFixer(okunanA - 1 - 1, maxH)][borderFixer(okunanB - 1 + 1, maxW)]);
     printf("\n");
-    printf("%-5d", imageMatrix[h][borderFixer(w - 1, maxW)]);
-    printf("%-5d", imageMatrix[h][w]);
-    printf("%-5d", imageMatrix[h][borderFixer(w + 1, maxW)]);
+    printf("%-5d", imageMatrix[okunanA - 1][borderFixer(okunanB - 1 - 1, maxW)]);
+    printf("%-5d", imageMatrix[okunanA - 1][okunanB - 1]);
+    printf("%-5d", imageMatrix[okunanA - 1][borderFixer(okunanB - 1 + 1, maxW)]);
     printf("\n");
-    printf("%-5d", imageMatrix[borderFixer(h + 1, maxH)][borderFixer(w - 1, maxW)]);
-    printf("%-5d", imageMatrix[borderFixer(h + 1, maxH)][w]);
-    printf("%-5d", imageMatrix[borderFixer(h + 1, maxH)][borderFixer(w + 1, maxW)]);
-    printf("\n-----------------------------------------------\n");
-    printf("\nImage Matrix: \n");
-    matrixYaz(5, 5, imageMatrix);
+    printf("%-5d", imageMatrix[borderFixer(okunanA - 1 + 1, maxH)][borderFixer(okunanB - 1 - 1, maxW)]);
+    printf("%-5d", imageMatrix[borderFixer(okunanA - 1 + 1, maxH)][okunanB - 1]);
+    printf("%-5d", imageMatrix[borderFixer(okunanA - 1 + 1, maxH)][borderFixer(okunanB - 1 + 1, maxW)]);
+    printf("\nImage Matrix: \n"
+           "-------------\n");
+    matrixYaz(maxH, maxW, imageMatrix);
 
-    printf("-----------------------------------------------\n");
-    printf("\nKernel Matrix: \n");
+    printf("\nKernel Matrix: \n"
+           "--------------\n");
     matrixYaz(3, 3, kernelMatrix);
-    printf("-----------------------------------------------\n");
-    printf("\nResult Matrix: \n");
-    matrixYaz(5, 5, resultMatrix);
-    scanf("%s");
+    printf("\nResult Matrix: \n"
+           "--------------\n");
+    matrixYaz(maxH, maxW, resultMatrix);
     return 0;
 }
