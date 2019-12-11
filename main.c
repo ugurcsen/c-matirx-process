@@ -24,7 +24,7 @@ void matrixYaz(int h, int w, int matrix[h][w]) {
     strcat(word2,"---------");
     for (int k = 0; k < w; ++k) {
         printf("(%6d)|", k + 1);
-        strcat(word2,"------");
+        strcat(word2,"---------");
     }
     printf("\n%s\n",word2);
     for (int i = 0; i < h; ++i) {
